@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
+import fuzzy from 'fuzzy';
 import HeaderBar from './HeaderBar';
 import CoinList from './CoinList';
+import Search from './Search';
+import { ConfirmButton } from './Button';
 import './App.css';
 const cc = require('cryptocompare');
 const _ = require('lodash');
@@ -13,6 +16,11 @@ const AppLayout = styled.div`
 `;
 
 const Content = styled.div``;
+
+export const CenterDiv = styled.div`
+  display: grid;
+  justify-content: center;
+`;
 
 const checkFirstVisit = () => {
   const cryptoCockpitData = localStorage.getItem('cryptoCockpit');
@@ -50,16 +58,19 @@ class App extends Component {
     }
   };
   confirmFavourites = () => {
-    localStorage.setItem('cryptoCockpit', 'test');
     this.setState({ firstVisit: false, page: 'dashboard' });
+    localStorage.setItem('cryptoCockpit', JSON.stringify({ favourites: this.state.favourites }));
   };
   settingsContent = () => {
     return (
       <div>
         {this.firstVisitMessage()}
-        <div onClick={this.confirmFavourites}>Confirm Favourites</div>
         <div>
           {CoinList.call(this, true)}
+          <CenterDiv>
+            <ConfirmButton onClick={this.confirmFavourites}>Confirm Favourites</ConfirmButton>
+          </CenterDiv>
+          {Search.call(this)}
           {CoinList.call(this)}
         </div>
       </div>
@@ -82,6 +93,29 @@ class App extends Component {
     this.setState({ favourites: _.pull(favourites, coinKey) });
   };
   isInFavourites = coinKey => _.includes(this.state.favourites, coinKey);
+  handleFilter = _.debounce(inputValue => {
+    const coinSymbols = Object.keys(this.state.coinList);
+    const coinNames = coinSymbols.map(sym => this.state.coinList[sym].CoinName);
+    const allStringsToSearch = coinSymbols.concat(coinNames);
+    const fuzzyResults = fuzzy
+      .filter(inputValue, allStringsToSearch, {})
+      .map(result => result.string);
+    const filteredCoins = _.pickBy(this.state.coinList, (result, symKey) => {
+      const coinName = result.CoinName;
+      return _.includes(fuzzyResults, symKey) || _.includes(fuzzyResults, coinName);
+    });
+
+    this.setState({ filteredCoins });
+  }, 500);
+  filterCoins = e => {
+    let inputValue = _.get(e, 'target.value');
+    if (!inputValue) {
+      this.setState({ filteredCoins: null });
+      return;
+    }
+    this.handleFilter(inputValue);
+  };
+
   render() {
     return (
       <AppLayout>

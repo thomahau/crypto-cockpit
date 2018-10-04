@@ -5,7 +5,11 @@ import { subtleBoxShadow, darkBackground, greenBoxShadow, redBoxShadow } from '.
 const CoinGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-  grid-gap: 15px;
+  ${props =>
+    props.count &&
+    css`
+      grid-template-columns: repeat(${props.count > 5 ? props.count : 5}, 1fr);
+    `} grid-gap: 15px;
   margin-top: 40px;
 `;
 
@@ -52,9 +56,12 @@ const DeleteIcon = styled.div`
 `;
 
 export default function(favourites = false) {
-  let coinKeys = favourites ? this.state.favourites : Object.keys(this.state.coinList).slice(0, 20);
+  const coinKeys = favourites
+    ? this.state.favourites
+    : (this.state.filteredCoins && Object.keys(this.state.filteredCoins)) ||
+      Object.keys(this.state.coinList).slice(0, 20);
   return (
-    <CoinGrid>
+    <CoinGrid count={favourites && this.state.favourites.length}>
       {coinKeys.map(coinKey => (
         <CoinTile
           chosen={this.isInFavourites(coinKey)}
