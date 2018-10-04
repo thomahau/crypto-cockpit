@@ -1,28 +1,11 @@
 import React, { Component } from 'react';
 import styled, { css } from 'styled-components';
+import HeaderBar from './HeaderBar';
 import './App.css';
+const cc = require('cryptocompare');
 
 const AppLayout = styled.div`
   padding: 40px;
-`;
-
-const Bar = styled.div`
-  display: grid;
-  grid-template-columns: 180px auto 100px 100px;
-  margin-bottom: 40px;
-`;
-
-const Logo = styled.div`
-  font-size: 1.5em;
-`;
-
-const ControlButton = styled.div`
-  cursor: pointer;
-  ${props =>
-    props.active &&
-    css`
-      text-shadow: 0px 0px 60px #03ff03;
-    `};
 `;
 
 const Content = styled.div``;
@@ -40,8 +23,16 @@ const checkFirstVisit = () => {
 
 class App extends Component {
   state = {
-    page: 'dashboard',
+    page: 'settings',
     ...checkFirstVisit()
+  };
+
+  componentDidMount = () => {
+    this.fetchCoins();
+  };
+  fetchCoins = async () => {
+    let coinList = (await cc.coinList()).Data;
+    this.setState({ coinList });
   };
 
   displayingDashboard = () => this.state.page === 'dashboard';
@@ -65,29 +56,19 @@ class App extends Component {
       </div>
     );
   };
+  loadingContent = () => {
+    if (!this.state.coinList) {
+      return <div>Loading data...</div>;
+    }
+  };
 
   render() {
     return (
       <AppLayout>
-        <Bar>
-          <Logo>CryptoCockpit</Logo>
-          <div />
-          {!this.state.firstVisit && (
-            <ControlButton
-              onClick={() => this.setState({ page: 'dashboard' })}
-              active={this.displayingDashboard()}
-            >
-              Dashboard
-            </ControlButton>
-          )}
-          <ControlButton
-            onClick={() => this.setState({ page: 'settings' })}
-            active={this.displayingSettings()}
-          >
-            Settings
-          </ControlButton>
-        </Bar>
-        <Content>{this.displayingSettings() && this.settingsContent()}</Content>
+        {HeaderBar.call(this)}
+        {this.loadingContent() || (
+          <Content>{this.displayingSettings() && this.settingsContent()}</Content>
+        )}
       </AppLayout>
     );
   }
