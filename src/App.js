@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import HeaderBar from './HeaderBar';
+import CoinList from './CoinList';
 import './App.css';
 const cc = require('cryptocompare');
 
@@ -53,6 +54,7 @@ class App extends Component {
       <div>
         {this.firstVisitMessage()}
         <div onClick={this.confirmFavourites}>Confirm Favourites</div>
+        <div>{CoinList.call(this)}</div>
       </div>
     );
   };
