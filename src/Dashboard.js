@@ -62,8 +62,6 @@ const PaddingBlue = styled.div`
 `;
 
 export default function() {
-  let self = this;
-
   return [
     <CoinGrid key={'coingrid'}>
       {this.state.prices.map((price, index) => {
@@ -71,9 +69,9 @@ export default function() {
         const data = price[sym]['USD'];
         const tileProps = {
           key: sym,
-          dashboardFavourite: sym === self.state.currentFavourite,
+          dashboardFavourite: sym === this.state.currentFavourite,
           onClick: () => {
-            self.setState({ currentFavourite: sym, historical: null }, self.fetchHistorical);
+            this.setState({ currentFavourite: sym, historical: null }, this.fetchHistorical);
             localStorage.setItem(
               'cryptoCockpit',
               JSON.stringify({
