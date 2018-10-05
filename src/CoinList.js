@@ -2,7 +2,7 @@ import React from 'react';
 import styled, { css } from 'styled-components';
 import { subtleBoxShadow, darkBackground, greenBoxShadow, redBoxShadow } from './Style';
 
-const CoinGrid = styled.div`
+export const CoinGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   ${props =>
@@ -13,7 +13,7 @@ const CoinGrid = styled.div`
   margin-top: 40px;
 `;
 
-const CoinTile = styled.div`
+export const CoinTile = styled.div`
   ${subtleBoxShadow};
   ${darkBackground};
   padding: 10px;
@@ -37,12 +37,12 @@ const CoinTile = styled.div`
     `};
 `;
 
-const CoinTileHeader = styled.div`
+export const CoinTileHeader = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
 `;
 
-const CoinSymbol = styled.div`
+export const CoinSymbol = styled.div`
   justify-self: right;
 `;
 

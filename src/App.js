@@ -4,6 +4,7 @@ import fuzzy from 'fuzzy';
 import HeaderBar from './HeaderBar';
 import CoinList from './CoinList';
 import Search from './Search';
+import Dashboard from './Dashboard';
 import { ConfirmButton } from './Button';
 import './App.css';
 const cc = require('cryptocompare');
@@ -23,31 +24,49 @@ export const CenterDiv = styled.div`
 `;
 
 const checkFirstVisit = () => {
-  const cryptoCockpitData = localStorage.getItem('cryptoCockpit');
+  const cryptoCockpitData = JSON.parse(localStorage.getItem('cryptoCockpit'));
   if (!cryptoCockpitData) {
     return {
       firstVisit: true,
       page: 'settings'
     };
   }
-  return {};
+  return { favourites: cryptoCockpitData.favourites };
 };
 
 class App extends Component {
   state = {
-    page: 'settings',
+    page: 'dashboard',
     favourites: ['ETH', 'BTC', 'XMR', 'EOS', 'ZRX'],
     ...checkFirstVisit()
   };
 
   componentDidMount = () => {
     this.fetchCoins();
+    this.fetchPrices();
   };
   fetchCoins = async () => {
     let coinList = (await cc.coinList()).Data;
     this.setState({ coinList });
   };
+  fetchPrices = async () => {
+    let prices;
+    try {
+      prices = await this.prices();
+    } catch (e) {
+      this.setState({ error: true });
+    }
+    console.log(prices);
+    this.setState({ prices });
+  };
+  prices = () => {
+    const promises = [];
+    this.state.favourites.forEach(sym => {
+      promises.push(cc.priceFull(sym, 'USD'));
+    });
 
+    return Promise.all(promises);
+  };
   displayingDashboard = () => this.state.page === 'dashboard';
   displayingSettings = () => this.state.page === 'settings';
   firstVisitMessage = () => {
@@ -58,7 +77,8 @@ class App extends Component {
     }
   };
   confirmFavourites = () => {
-    this.setState({ firstVisit: false, page: 'dashboard' });
+    this.setState({ firstVisit: false, page: 'dashboard', prices: null });
+    this.fetchPrices();
     localStorage.setItem('cryptoCockpit', JSON.stringify({ favourites: this.state.favourites }));
   };
   settingsContent = () => {
@@ -78,7 +98,10 @@ class App extends Component {
   };
   loadingContent = () => {
     if (!this.state.coinList) {
-      return <div>Loading data...</div>;
+      return <div>Loading coins...</div>;
+    }
+    if (!this.state.prices) {
+      return <div>Loading prices...</div>;
     }
   };
   addCoinToFavourites = coinKey => {
@@ -121,7 +144,10 @@ class App extends Component {
       <AppLayout>
         {HeaderBar.call(this)}
         {this.loadingContent() || (
-          <Content>{this.displayingSettings() && this.settingsContent()}</Content>
+          <Content>
+            {this.displayingSettings() && this.settingsContent()}
+            {this.displayingDashboard() && Dashboard.call(this)}
+          </Content>
         )}
       </AppLayout>
     );
