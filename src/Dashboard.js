@@ -2,6 +2,11 @@ import React from 'react';
 import styled, { css } from 'styled-components';
 import { CoinGrid, CoinTile, CoinTileHeader, CoinSymbol } from './CoinList';
 import { fontSizeBig, fontSize3, subtleBoxShadow, darkBackground } from './Style';
+import highchartsConfig from './HighchartsConfig';
+import theme from './HighchartsTheme';
+
+const ReactHighcharts = require('react-highcharts');
+ReactHighcharts.Highcharts.setOptions(theme());
 
 const formatNumber = number => number.toFixed(2);
 
@@ -97,7 +102,9 @@ export default function() {
           alt={`${this.state.currentFavourite} logo`}
         />
       </PaddingBlue>
-      <PaddingBlue>Chart goes here</PaddingBlue>
+      <PaddingBlue>
+        <ReactHighcharts config={highchartsConfig.call(this)} />
+      </PaddingBlue>
     </ChartGrid>
   ];
 }
