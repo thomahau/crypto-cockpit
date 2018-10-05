@@ -1,7 +1,7 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
 import { CoinGrid, CoinTile, CoinTileHeader, CoinSymbol } from './CoinList';
-import { fontSizeBig, fontSize3 } from './Style';
+import { fontSizeBig, fontSize3, subtleBoxShadow, darkBackground } from './Style';
 
 const formatNumber = number => number.toFixed(2);
 
@@ -26,14 +26,41 @@ const CoinTileCompact = CoinTile.extend`
   ${fontSize3};
 `;
 
+const ChartGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  grid-gap: 15px;
+  margin-top: 20px;
+`;
+
+const PaddingBlue = styled.div`
+  ${subtleBoxShadow};
+  ${darkBackground};
+  padding: 5px;
+`;
+
 export default function() {
-  return (
+  let self = this;
+  return [
     <CoinGrid>
       {this.state.prices.map((price, index) => {
-        let sym = Object.keys(price)[0];
-        let data = price[sym]['USD'];
+        const sym = Object.keys(price)[0];
+        const data = price[sym]['USD'];
+        const tileProps = {
+          dashboardFavourite: sym === self.state.currentFavourite,
+          onClick: () => {
+            self.setState({ currentFavourite: sym });
+            localStorage.setItem(
+              'cryptoCockpit',
+              JSON.stringify({
+                ...JSON.parse(localStorage.getItem('cryptoCockpit')),
+                currentFavourite: sym
+              })
+            );
+          }
+        };
         return index < 5 ? (
-          <CoinTile>
+          <CoinTile {...tileProps}>
             <CoinTileHeader>
               <div>{sym}</div>
               <CoinSymbol>
@@ -45,7 +72,7 @@ export default function() {
             <TickerPrice>${formatNumber(data.PRICE)}</TickerPrice>
           </CoinTile>
         ) : (
-          <CoinTileCompact>
+          <CoinTileCompact {...tileProps}>
             <div style={{ justifySelf: 'left' }}>{sym}</div>
             <CoinSymbol>
               <ChangePct red={data.CHANGEPCT24HOUR < 0}>
@@ -56,6 +83,21 @@ export default function() {
           </CoinTileCompact>
         );
       })}
-    </CoinGrid>
-  );
+    </CoinGrid>,
+    <ChartGrid key={'chartgrid'}>
+      <PaddingBlue>
+        <h2 style={{ textAlign: 'center' }}>
+          {this.state.coinList[this.state.currentFavourite].CoinName}
+        </h2>
+        <img
+          style={{ height: '200px', display: 'block', margin: 'auto' }}
+          src={`http://cryptocompare.com/${
+            this.state.coinList[this.state.currentFavourite].ImageUrl
+          }`}
+          alt={`${this.state.currentFavourite} logo`}
+        />
+      </PaddingBlue>
+      <PaddingBlue>Chart goes here</PaddingBlue>
+    </ChartGrid>
+  ];
 }

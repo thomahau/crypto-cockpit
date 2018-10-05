@@ -22,7 +22,7 @@ export const CenterDiv = styled.div`
   display: grid;
   justify-content: center;
 `;
-
+//getInitialState
 const checkFirstVisit = () => {
   const cryptoCockpitData = JSON.parse(localStorage.getItem('cryptoCockpit'));
   if (!cryptoCockpitData) {
@@ -31,7 +31,8 @@ const checkFirstVisit = () => {
       page: 'settings'
     };
   }
-  return { favourites: cryptoCockpitData.favourites };
+  const { favourites, currentFavourite } = cryptoCockpitData;
+  return { favourites, currentFavourite };
 };
 
 class App extends Component {
@@ -77,9 +78,18 @@ class App extends Component {
     }
   };
   confirmFavourites = () => {
-    this.setState({ firstVisit: false, page: 'dashboard', prices: null });
+    const currentFavourite = this.state.favourites[0];
+    this.setState({
+      firstVisit: false,
+      page: 'dashboard',
+      prices: null,
+      currentFavourite
+    });
     this.fetchPrices();
-    localStorage.setItem('cryptoCockpit', JSON.stringify({ favourites: this.state.favourites }));
+    localStorage.setItem(
+      'cryptoCockpit',
+      JSON.stringify({ favourites: this.state.favourites, currentFavourite })
+    );
   };
   settingsContent = () => {
     return (
