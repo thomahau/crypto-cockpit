@@ -72,6 +72,7 @@ export default function(favourites = false) {
     <CoinGrid count={favourites && this.state.favourites.length}>
       {coinKeys.map(coinKey => (
         <CoinTile
+          key={coinKey}
           chosen={this.isInFavourites(coinKey)}
           favourite={favourites}
           onClick={

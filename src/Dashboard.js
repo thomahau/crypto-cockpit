@@ -65,11 +65,12 @@ export default function() {
   let self = this;
 
   return [
-    <CoinGrid>
+    <CoinGrid key={'coingrid'}>
       {this.state.prices.map((price, index) => {
         const sym = Object.keys(price)[0];
         const data = price[sym]['USD'];
         const tileProps = {
+          key: sym,
           dashboardFavourite: sym === self.state.currentFavourite,
           onClick: () => {
             self.setState({ currentFavourite: sym, historical: null }, self.fetchHistorical);
@@ -95,7 +96,7 @@ export default function() {
             <TickerPrice>${formatNumber(data.PRICE)}</TickerPrice>
           </CoinTile>
         ) : (
-          <CoinTileCompact {...tileProps}>
+          <CoinTileCompact key={index} {...tileProps}>
             <div style={{ justifySelf: 'left' }}>{sym}</div>
             <CoinSymbol>
               <ChangePct red={data.CHANGEPCT24HOUR < 0}>
@@ -122,15 +123,14 @@ export default function() {
       </PaddingBlue>
       <PaddingBlue>
         <ChartSelect
+          defaultValue={'months'}
           onChange={e => {
             this.setState({ timeInterval: e.target.value, historical: null }, this.fetchHistorical);
           }}
         >
           <option value="days">Days</option>
           <option value="weeks">Weeks</option>
-          <option selected value="months">
-            Months
-          </option>
+          <option value="months">Months</option>
         </ChartSelect>
         {this.state.historical ? (
           <ReactHighcharts config={highchartsConfig.call(this)} />
