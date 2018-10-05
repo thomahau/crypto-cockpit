@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import fuzzy from 'fuzzy';
+import moment from 'moment';
 import HeaderBar from './HeaderBar';
 import CoinList from './CoinList';
 import Search from './Search';
@@ -11,6 +12,7 @@ const cc = require('cryptocompare');
 const _ = require('lodash');
 
 const MAX_FAVOURITES = 10;
+const TIME_UNITS = 10;
 
 const AppLayout = styled.div`
   padding: 40px;
@@ -45,19 +47,21 @@ class App extends Component {
   componentDidMount = () => {
     this.fetchCoins();
     this.fetchPrices();
+    this.fetchHistorical();
   };
   fetchCoins = async () => {
     let coinList = (await cc.coinList()).Data;
     this.setState({ coinList });
   };
   fetchPrices = async () => {
+    if (this.state.firstVisit) return;
     let prices;
     try {
       prices = await this.prices();
     } catch (e) {
       this.setState({ error: true });
     }
-    console.log(prices);
+
     this.setState({ prices });
   };
   prices = () => {
@@ -66,6 +70,38 @@ class App extends Component {
       promises.push(cc.priceFull(sym, 'USD'));
     });
 
+    return Promise.all(promises);
+  };
+  fetchHistorical = async () => {
+    if (this.state.firstVisit) return;
+    const results = await this.historical();
+    const historical = [
+      {
+        name: this.state.currentFavourite,
+        data: results.map((ticker, index) => [
+          moment()
+            .subtract({ months: TIME_UNITS - index })
+            .valueOf(),
+          ticker.USD
+        ])
+      }
+    ];
+
+    this.setState({ historical });
+  };
+  historical = () => {
+    const promises = [];
+    for (let units = TIME_UNITS; units > 0; units--) {
+      promises.push(
+        cc.priceHistorical(
+          this.state.currentFavourite,
+          ['USD'],
+          moment()
+            .subtract({ months: units })
+            .toDate()
+        )
+      );
+    }
     return Promise.all(promises);
   };
   displayingDashboard = () => this.state.page === 'dashboard';
@@ -79,13 +115,19 @@ class App extends Component {
   };
   confirmFavourites = () => {
     const currentFavourite = this.state.favourites[0];
-    this.setState({
-      firstVisit: false,
-      page: 'dashboard',
-      prices: null,
-      currentFavourite
-    });
-    this.fetchPrices();
+    this.setState(
+      {
+        firstVisit: false,
+        page: 'dashboard',
+        prices: null,
+        historical: null,
+        currentFavourite
+      },
+      () => {
+        this.fetchPrices();
+        this.fetchHistorical();
+      }
+    );
     localStorage.setItem(
       'cryptoCockpit',
       JSON.stringify({ favourites: this.state.favourites, currentFavourite })
@@ -110,7 +152,7 @@ class App extends Component {
     if (!this.state.coinList) {
       return <div>Loading coins...</div>;
     }
-    if (!this.state.prices) {
+    if (!this.state.firstVisit && !this.state.prices) {
       return <div>Loading prices...</div>;
     }
   };

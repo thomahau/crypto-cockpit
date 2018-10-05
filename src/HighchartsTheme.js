@@ -14,7 +14,7 @@ export default function() {
       '#aaeeee'
     ],
     chart: {
-      backgroundColor: '#000000',
+      backgroundColor: '#303030',
       borderWidth: 0,
       borderRadius: 0,
       plotBackgroundColor: null,

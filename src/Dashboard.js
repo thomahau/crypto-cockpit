@@ -46,6 +46,7 @@ const PaddingBlue = styled.div`
 
 export default function() {
   let self = this;
+
   return [
     <CoinGrid>
       {this.state.prices.map((price, index) => {
@@ -54,7 +55,7 @@ export default function() {
         const tileProps = {
           dashboardFavourite: sym === self.state.currentFavourite,
           onClick: () => {
-            self.setState({ currentFavourite: sym });
+            self.setState({ currentFavourite: sym, historical: null }, self.fetchHistorical);
             localStorage.setItem(
               'cryptoCockpit',
               JSON.stringify({
@@ -103,7 +104,11 @@ export default function() {
         />
       </PaddingBlue>
       <PaddingBlue>
-        <ReactHighcharts config={highchartsConfig.call(this)} />
+        {this.state.historical ? (
+          <ReactHighcharts config={highchartsConfig.call(this)} />
+        ) : (
+          <div>Loading historical data...</div>
+        )}
       </PaddingBlue>
     </ChartGrid>
   ];
