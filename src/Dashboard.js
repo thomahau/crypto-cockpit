@@ -1,7 +1,14 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
 import { CoinGrid, CoinTile, CoinTileHeader, CoinSymbol } from './CoinList';
-import { fontSizeBig, fontSize3, subtleBoxShadow, darkBackground } from './Style';
+import {
+  fontSizeBig,
+  fontSize2,
+  fontSize3,
+  subtleBoxShadow,
+  darkBackground,
+  backgroundColor2
+} from './Style';
 import highchartsConfig from './HighchartsConfig';
 import theme from './HighchartsTheme';
 
@@ -9,6 +16,16 @@ const ReactHighcharts = require('react-highcharts');
 ReactHighcharts.Highcharts.setOptions(theme());
 
 const formatNumber = number => number.toFixed(2);
+
+const ChartSelect = styled.select`
+  ${backgroundColor2};
+  color: white;
+  border: 1px solid;
+  ${fontSize2};
+  margin: 5px;
+  height: 25px;
+  float: right;
+`;
 
 const ChangePct = styled.div`
   color: green;
@@ -104,6 +121,17 @@ export default function() {
         />
       </PaddingBlue>
       <PaddingBlue>
+        <ChartSelect
+          onChange={e => {
+            this.setState({ timeInterval: e.target.value, historical: null }, this.fetchHistorical);
+          }}
+        >
+          <option value="days">Days</option>
+          <option value="weeks">Weeks</option>
+          <option selected value="months">
+            Months
+          </option>
+        </ChartSelect>
         {this.state.historical ? (
           <ReactHighcharts config={highchartsConfig.call(this)} />
         ) : (

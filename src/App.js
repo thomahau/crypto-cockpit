@@ -41,6 +41,7 @@ class App extends Component {
   state = {
     page: 'dashboard',
     favourites: ['ETH', 'BTC', 'XMR', 'EOS', 'ZRX'],
+    timeInterval: 'months',
     ...checkFirstVisit()
   };
 
@@ -80,7 +81,7 @@ class App extends Component {
         name: this.state.currentFavourite,
         data: results.map((ticker, index) => [
           moment()
-            .subtract({ months: TIME_UNITS - index })
+            .subtract({ [this.state.timeInterval]: TIME_UNITS - index })
             .valueOf(),
           ticker.USD
         ])
@@ -97,7 +98,7 @@ class App extends Component {
           this.state.currentFavourite,
           ['USD'],
           moment()
-            .subtract({ months: units })
+            .subtract({ [this.state.timeInterval]: units })
             .toDate()
         )
       );
